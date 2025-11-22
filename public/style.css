@@ -1,0 +1,116 @@
+*{
+    margin: 0;
+    padding: 0;
+    color: azure;
+}
+
+body {
+    background-image: url('img/fundo.jpg');
+    width: 100%;
+    height: 100vh; /* Ocupa 100% da ALTURA da tela (vh = viewport height) */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    image-rendering: optimizeQuality; 
+}
+
+.fundo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.85);
+    width: 80%;
+    margin: auto;
+    margin-top: 3vh;
+    border-radius: 25px;
+    height: auto;
+}
+
+.texto-titulo {
+    display: block;
+    align-items: center;
+    text-align: center;
+    font-style: oblique;
+} .cor-diferente {
+    color: rgb(218, 150, 25);
+    text-shadow: 1px 1px 2px black;
+} 
+
+.nome-participante {
+    margin-top: 2vh;
+    display: flex;
+    height: auto;
+    align-items: center;
+    padding: 5px;
+}
+.entrada-nome {
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;
+}
+.digitando-nome {
+    font-weight: bold;
+    font-style: italic;
+    text-align: center;
+    font-size: 14px;
+    color: black;
+    height: 40px;
+    width: auto;
+    margin-right: 5px;
+}
+
+.container__botao {
+    padding: 20px;
+}
+
+.container__botao button{
+    text-align: center;
+    width: 150px;
+    height: 40px;
+    background-color: rgb(6, 6, 130);
+    border: none;
+    cursor: pointer;
+    border-radius: 20px;
+    padding: auto;
+    transition: transform 0.5s ease-in-out;
+} .container__botao button:hover {
+    transform: scale(1.1);
+    background-color: #0056b3;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.7);
+    border: 1px solid rgb(31, 31, 194);
+} .container__sortear {
+    font-size: 1.1em;
+    font-weight: bolder;
+    font-style: italic;
+    text-align: center;
+    padding: 5px;
+}
+
+.container__botao button:disabled {
+    background-color: #555;
+    opacity: 0.6;
+    cursor: not-allowed; /* Altere o cursor para indicar que não é clicável */
+    transform: none;
+    box-shadow: none;
+} .container__botao button:disabled:hover {
+    transform: none;
+    background-color: #555; 
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.container__texto {
+    text-align: center;
+    padding: 10px;
+}
+
+.texto__paragrafo {
+    font-size: 1.1em;
+    font-weight: bolder;
+    font-style: italic;
+    text-align: center;
+    padding: 5px;
+}
+
