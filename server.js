@@ -94,7 +94,7 @@ app.post("/sortear", (req, res) => {
     salvarParticipantes(participantes);
 
     res.json({
-        mensagem: `${nomeSorteado}`
+        sorteado: `${nomeSorteado}`
     });
 });
 
