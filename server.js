@@ -1,73 +1,106 @@
 const express = require('express');
 const path = require('path');
-import path from "path";
-import { fileURLToPath } from "url";
-const port = process.env.PORT || 3000;
+// Importação do módulo 'fs' é necessária para carregar e salvar o JSON
+const fs = require('fs'); 
 
-
+// Variáveis essenciais
+const PORT = process.env.PORT || 3000;
+const DB_FILE = path.join(__dirname, 'participantes.json'); // Usando path.join para segurança
 
 const app = express();
-app.use(express.json());
+
+// Configuração do Middleware
+app.use(express.json()); // Permite que o servidor leia payloads JSON (como o nome no /sortear)
+
+// --- Módulos duplicados removidos: 'import path from "path";' e 'import { fileURLToPath } from "url";'
 
 // 1. Lógica para servir arquivos estáticos da pasta 'public'
+// Se estiver usando CommonJS (require), __dirname está disponível globalmente.
+// Removemos as linhas: __filename = fileURLToPath... e __dirname = path.dirname...
+// Removida a segunda chamada duplicada app.use(express.static...
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-
-// Para servir arquivos da pasta public
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "public")));
-
-const DB_FILE = "./participantes.json";
-
+// --- Funções de Banco de Dados ---
 // Carrega lista
 function carregarParticipantes() {
-  return JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+    // Tratamento de erro básico caso o arquivo não exista ou esteja vazio.
+    try {
+        const data = fs.readFileSync(DB_FILE, "utf-8");
+        return JSON.parse(data);
+    } catch (error) {
+        console.error("Erro ao carregar participantes, retornando lista vazia:", error.message);
+        return [];
+    }
 }
 
 // Salva lista
 function salvarParticipantes(lista) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2), "utf-8");
+    fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2), "utf-8");
 }
+
+
+// --- Rotas da API ---
+
+// ➜ Rota de Root: Opcional, mas serve o index.html principal
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // ➜ Sortear
 app.post("/sortear", (req, res) => {
-  const { nome } = req.body;
+    // Lógica para garantir que 'participantes.json' exista antes de tentar ler/escrever.
+    if (!fs.existsSync(DB_FILE)) {
+        return res.status(500).json({ erro: "Arquivo de participantes não encontrado." });
+    }
 
-  if (!nome) {
-    return res.status(400).json({ erro: "Informe seu nome" });
-  }
+    const { nome } = req.body;
 
-  let participantes = carregarParticipantes();
+    if (!nome) {
+        return res.status(400).json({ erro: "Informe seu nome" });
+    }
 
-  if (!participantes.some(p => p.toLowerCase() === nome.toLowerCase())) {
-    return res.status(400).json({ erro: "Você não está na lista!" });
-  }
+    let participantes = carregarParticipantes();
 
-  const elegiveis = participantes.filter(
-    p => p.toLowerCase() !== nome.toLowerCase()
-  );
+    // Verificação se já houve sorteio (participantes deve ter menos que o total original)
+    if (participantes.length === 0) {
+        // Você pode querer recarregar a lista original aqui ou informar que o sorteio acabou.
+        return res.status(400).json({ erro: "A lista de participantes está vazia, o sorteio pode ter acabado." });
+    }
+    
+    // Filtra para remover o próprio nome do elegível e garantir que ele está na lista
+    const participantePresente = participantes.some(p => p.toLowerCase() === nome.toLowerCase());
 
-  if (elegiveis.length === 0) {
-    return res.status(400).json({ erro: "Não há mais participantes disponíveis." });
-  }
+    if (!participantePresente) {
+        return res.status(400).json({ erro: "Você não está na lista!" });
+    }
 
-  const indice = Math.floor(Math.random() * elegiveis.length);
-  const nomeSorteado = elegiveis[indice];
+    // Filtra quem não pode ser sorteado (o próprio nome)
+    const elegiveis = participantes.filter(
+        p => p.toLowerCase() !== nome.toLowerCase()
+    );
 
-  participantes = participantes.filter(p => p !== nomeSorteado);
-  salvarParticipantes(participantes);
+    if (elegiveis.length === 0) {
+        return res.status(400).json({ erro: "Não há mais participantes disponíveis para sortear." });
+    }
 
-  res.json({
-    mensagem: `🎉 ${nome}, seu amigo secreto é: ${nomeSorteado}`
-  });
+    // Lógica de Sorteio
+    const indice = Math.floor(Math.random() * elegiveis.length);
+    const nomeSorteado = elegiveis[indice];
+
+    // Remove o nome sorteado da lista de participantes para evitar repetição (se a intenção for essa)
+    // Nota: Esta lógica é válida se a lista 'participantes.json' for sendo esvaziada a cada sorteio.
+    participantes = participantes.filter(p => p.toLowerCase() !== nomeSorteado.toLowerCase()); 
+    salvarParticipantes(participantes);
+
+    res.json({
+        mensagem: `🎉 ${nome}, seu amigo secreto é: ${nomeSorteado}`
+    });
 });
 
-// Inicia servidor
-app.listen(3000, () => {
-  console.log("Servidor rodando em http://localhost:3000");
+// --- Inicia servidor ---
+// Apenas uma chamada para 'app.listen' é necessária.
+app.listen(PORT, () => {
+    console.log("Servidor rodando na porta " + PORT);
+    console.log(`Acesse: http://localhost:${PORT}`);
 });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Rodando na porta " + PORT));
