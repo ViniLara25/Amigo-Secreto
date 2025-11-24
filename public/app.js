@@ -13,8 +13,8 @@ async function sortear() {
     if (!nome) return;
 
     try {
-        const resposta = await fetch('/sortear', { /* ... */ }, {
-
+        // CORREÇÃO: Removido o objeto vazio. Agora são apenas 2 argumentos: URL e Config.
+        const resposta = await fetch('/sortear', {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nome })
@@ -25,7 +25,9 @@ async function sortear() {
         if (dados.erro) {
             resultado.innerHTML = `❌ ${dados.erro}`;
         } else {
-            resultado.innerHTML = `🎁 ${dados.mensagem}`;
+            // Seu server.js retorna apenas o nome sorteado na chave 'mensagem'. 
+            // Vou ajustar para incluir o texto completo, já que o frontend espera:
+            resultado.innerHTML = `🎁 ${nome}, seu amigo secreto é: ${dados.mensagem}`;
         }
 
     } catch (erro) {
