@@ -27,7 +27,7 @@ async function sortear() {
         } else {
             // Seu server.js retorna apenas o nome sorteado na chave 'mensagem'. 
             // Vou ajustar para incluir o texto completo, já que o frontend espera:
-            //resultado.innerHTML = `🎁 ${nome}, seu amigo secreto é: ${dados.mensagem}`;
+            resultado.innerHTML = `🎁 ${nome}, seu amigo secreto é: ${dados.mensagem}`;
         }
 
     } catch (erro) {
