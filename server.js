@@ -1,10 +1,18 @@
-import express from "express";
-import fs from "fs";
+const express = require('express');
+const path = require('path');
 import path from "path";
 import { fileURLToPath } from "url";
+const port = process.env.PORT || 3000;
+
+
 
 const app = express();
 app.use(express.json());
+
+// 1. Lógica para servir arquivos estáticos da pasta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 // Para servir arquivos da pasta public
 const __filename = fileURLToPath(import.meta.url);
