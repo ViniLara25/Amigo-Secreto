@@ -13,7 +13,7 @@ async function sortear() {
     if (!nome) return;
 
     try {
-        const resposta = await fetch("https://amigo-secreto.railway.internal/sortear", {
+        const resposta = await fetch('/sortear', { /* ... */ }, {
 
             method: "POST",
             headers: { "Content-Type": "application/json" },
