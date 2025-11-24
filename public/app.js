@@ -2,6 +2,9 @@ const inputNome = document.getElementById('digitando-nome');
 const btnSortear = document.getElementById('btn-sortear');
 const resultado = document.getElementById('resultado');
 
+// public/app.js (Linha essencial que faltava!)
+btnSortear.addEventListener('click', sortear);
+
 // Habilita / desabilita o botão
 inputNome.addEventListener('input', () => {
     btnSortear.disabled = !inputNome.value.trim();
