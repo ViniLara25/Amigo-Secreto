@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs'); 
+// Acesso negado ao Shell do Render no plano gratuito.
+// A rota /admin/pares abaixo é a solução de gerenciamento.
 
 // Variáveis essenciais
 const PORT = process.env.PORT || 3000;
@@ -13,23 +15,24 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-// --- Funções de Banco de Dados (Refatoradas) ---
+// --- Funções de Banco de Dados (ATUALIZADAS para incluir 'pares') ---
 
-// Carrega lista: Agora retorna um objeto com 'sorteadores' e 'elegiveis'.
+// Carrega lista: Agora retorna um objeto com 'sorteadores', 'elegiveis' e 'pares'.
 function carregarParticipantes() {
     try {
         const data = fs.readFileSync(DB_FILE, "utf-8");
         const parsedData = JSON.parse(data);
         
-        // Garante que a estrutura esperada é retornada
+        // Garante que todas as três estruturas (incluindo 'pares') são retornadas
         return {
             sorteadores: parsedData.sorteadores || [],
-            elegiveis: parsedData.elegiveis || []
+            elegiveis: parsedData.elegiveis || [],
+            pares: parsedData.pares || [] // <--- ADICIONADO PARES
         };
     } catch (error) {
-        // Retorna a estrutura inicial para evitar quebrar o código
         console.error("Erro ao carregar participantes, retornando estrutura vazia:", error.message);
-        return { sorteadores: [], elegiveis: [] };
+        // Retorna a estrutura inicial com PARES vazia em caso de erro
+        return { sorteadores: [], elegiveis: [], pares: [] }; // <--- ADICIONADO PARES
     }
 }
 
@@ -45,6 +48,20 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ➜ ROTA DE ADMINISTRAÇÃO (APENAS PARA GERENCIAMENTO DE PARES)
+// Expõe a lista completa de pares sorteados. Use com cautela!
+app.get('/admin/pares', (req, res) => {
+    // Carrega o estado atual para obter a lista de pares
+    const { pares } = carregarParticipantes(); 
+    
+    if (pares.length === 0) {
+        return res.json({ mensagem: "Nenhum par sorteado ainda." });
+    }
+    // Retorna todos os pares registrados
+    res.json(pares);
+});
+
+
 // ➜ Sortear
 app.post("/sortear", (req, res) => {
     
@@ -58,40 +75,30 @@ app.post("/sortear", (req, res) => {
         return res.status(400).json({ erro: "Informe seu nome" });
     }
 
-    // Carrega a estrutura de duas listas
-    let { sorteadores, elegiveis } = carregarParticipantes();
+    // Carrega a estrutura completa de três listas
+    let { sorteadores, elegiveis, pares } = carregarParticipantes();
     
-    // 1. VERIFICAÇÃO DO JOGO
+    // ... Lógica de Verificação (inalterada) ...
+
     if (sorteadores.length === 0) {
-        // Verifica se o jogo realmente acabou (todos sortearam)
         return res.status(400).json({ erro: "O sorteio já foi concluído! Todos já sortearam." });
     }
     
-    // 2. VERIFICAÇÃO SE O USUÁRIO PODE SORTEAR
-    // Verifica se o nome ainda está na lista de quem pode sortear
     const podeSortear = sorteadores.some(p => p.toLowerCase() === nome.toLowerCase());
 
     if (!podeSortear) {
         return res.status(400).json({ erro: "Você já sorteou seu amigo secreto e não pode sortear novamente!" });
     }
 
-    // 3. FILTRO DE ELEGÍVEIS
-    // Filtra quem não pode ser sorteado (o próprio nome) da lista de elegíveis
     const elegiveisParaSorteio = elegiveis.filter(
         p => p.toLowerCase() !== nome.toLowerCase()
     );
 
     if (elegiveisParaSorteio.length === 0) {
-         // Esta é a condição do último sorteio, onde só resta uma pessoa para sortear a primeira (ciclo)
+        // ... Lógica de Erro de Ciclo (inalterada) ...
         if (sorteadores.length === 1 && elegiveis.length === 1) {
-             // Se o último sorteador só tem uma opção (ele mesmo),
-             // significa que a primeira pessoa sorteada deve ser sorteada pelo último.
-             // Como seu `participantes.json` tem o mesmo número de pessoas nas duas listas,
-             // o último sorteador sempre será capaz de sortear o último elegível.
-             // Para o escopo deste projeto, assumimos que esta condição não será atingida.
              return res.status(400).json({ erro: "Erro de ciclo: Você é a única pessoa que sobrou para sortear a si mesma. Por favor, reinicie o sorteio." });
         }
-        
         return res.status(400).json({ erro: "Não há participantes disponíveis para você sortear." });
     }
 
@@ -101,14 +108,21 @@ app.post("/sortear", (req, res) => {
 
     // 5. ATUALIZAÇÃO DO JOGO
     
-    // A. Remove QUEM SORTEOU ('nome') da lista de sorteadores
+    // A. NOVO: Registra o par para fins de gerenciamento
+    pares.push({
+        sorteador: nome,
+        sorteado: nomeSorteado,
+        data: new Date().toISOString() // Opcional: Adiciona carimbo de data/hora
+    }); // <--- NOVO CÓDIGO
+
+    // B. Remove QUEM SORTEOU ('nome') da lista de sorteadores
     sorteadores = sorteadores.filter(p => p.toLowerCase() !== nome.toLowerCase());
     
-    // B. Remove QUEM FOI SORTEADO ('nomeSorteado') da lista de elegíveis
+    // C. Remove QUEM FOI SORTEADO ('nomeSorteado') da lista de elegíveis
     elegiveis = elegiveis.filter(p => p.toLowerCase() !== nomeSorteado.toLowerCase()); 
     
-    // Salva a nova estrutura de listas
-    salvarParticipantes({ sorteadores, elegiveis });
+    // Salva a nova estrutura de listas (AGORA COM 'pares' INCLUSO!)
+    salvarParticipantes({ sorteadores, elegiveis, pares });
 
     // 6. RESPOSTA AO CLIENTE
     res.json({
