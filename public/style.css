@@ -1,13 +1,13 @@
 *{
     margin: 0;
     padding: 0;
-    color: azure;
+    color: rgb(179, 26, 26);
 }
 
 body {
-    background-image: url('img/fundo.jpg');
-    width: 100%;
-    height: 100vh; /* Ocupa 100% da ALTURA da tela (vh = viewport height) */
+    background-image: url('img/fundo_2.jpg');
+    max-width: 100%;
+    height: 90vh; /* Ocupa 100% da ALTURA da tela (vh = viewport height) */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -19,10 +19,10 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(244, 238, 224, 0.8);
     width: 80%;
     margin: auto;
-    margin-top: 3vh;
+    margin-top: 10vh;
     border-radius: 25px;
     height: auto;
 }
@@ -33,8 +33,8 @@ body {
     text-align: center;
     font-style: oblique;
 } .cor-diferente {
-    color: rgb(218, 150, 25);
-    text-shadow: 1px 1px 2px black;
+    color: rgb(107, 104, 104);
+    /*text-shadow: 1px 1px 2px black;*/
 } 
 
 .nome-participante {
@@ -45,7 +45,7 @@ body {
     padding: 5px;
 }
 .entrada-nome {
-    font-size: 1.2em;
+    font-size: 1em;
     font-weight: bold;
     text-align: center;
     padding: 5px;
@@ -69,7 +69,7 @@ body {
     text-align: center;
     width: 150px;
     height: 40px;
-    background-color: rgb(6, 6, 130);
+    background-color: rgb(43, 43, 44);
     border: none;
     cursor: pointer;
     border-radius: 20px;
@@ -77,19 +77,20 @@ body {
     transition: transform 0.5s ease-in-out;
 } .container__botao button:hover {
     transform: scale(1.1);
-    background-color: #0056b3;
-    box-shadow: 0 0 15px rgba(0, 123, 255, 0.7);
-    border: 1px solid rgb(31, 31, 194);
+    background-color: #758fac;
+    box-shadow: 0 0 15px rgba(190, 201, 212, 0.7);
+    border: 1px solid rgb(116, 116, 141);
 } .container__sortear {
     font-size: 1.1em;
     font-weight: bolder;
     font-style: italic;
     text-align: center;
     padding: 5px;
+    color: rgb(238, 233, 233);
 }
 
 .container__botao button:disabled {
-    background-color: #555;
+    background-color: #535252;
     opacity: 0.6;
     cursor: not-allowed; /* Altere o cursor para indicar que não é clicável */
     transform: none;
