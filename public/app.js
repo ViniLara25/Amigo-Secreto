@@ -10,6 +10,19 @@ inputNome.addEventListener('input', () => {
     btnSortear.disabled = !inputNome.value.trim();
 });
 
+// public/app.js (Adicione este bloco)
+
+inputNome.addEventListener('keyup', (event) => {
+    // 1. Verifica se a tecla pressionada é o 'Enter' (ou 'Return')
+    if (event.key === 'Enter') {
+        // 2. Garante que o campo não está vazio (o botão não está desabilitado)
+        if (!btnSortear.disabled) {
+            // 3. Chama a função de sorteio
+            sortear();
+        }
+    }
+});
+
 async function sortear() {
     const nome = inputNome.value.trim();
 
