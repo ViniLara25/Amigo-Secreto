@@ -1,57 +1,55 @@
 const express = require('express');
 const path = require('path');
-// Importação do módulo 'fs' é necessária para carregar e salvar o JSON
 const fs = require('fs'); 
 
 // Variáveis essenciais
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'participantes.json'); // Usando path.join para segurança
+const DB_FILE = path.join(__dirname, 'participantes.json'); 
 
 const app = express();
 
-// Configuração do Middleware
-app.use(express.json()); // Permite que o servidor leia payloads JSON (como o nome no /sortear)
-
-// --- Módulos duplicados removidos: 'import path from "path";' e 'import { fileURLToPath } from "url";'
-
-// 1. Lógica para servir arquivos estáticos da pasta 'public'
-// Se estiver usando CommonJS (require), __dirname está disponível globalmente.
-// Removemos as linhas: __filename = fileURLToPath... e __dirname = path.dirname...
-// Removida a segunda chamada duplicada app.use(express.static...
+// --- Configuração do Middleware ---
+app.use(express.json()); 
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-// --- Funções de Banco de Dados ---
-// Carrega lista
+// --- Funções de Banco de Dados (Refatoradas) ---
+
+// Carrega lista: Agora retorna um objeto com 'sorteadores' e 'elegiveis'.
 function carregarParticipantes() {
-    // Tratamento de erro básico caso o arquivo não exista ou esteja vazio.
     try {
         const data = fs.readFileSync(DB_FILE, "utf-8");
-        return JSON.parse(data);
+        const parsedData = JSON.parse(data);
+        
+        // Garante que a estrutura esperada é retornada
+        return {
+            sorteadores: parsedData.sorteadores || [],
+            elegiveis: parsedData.elegiveis || []
+        };
     } catch (error) {
-        console.error("Erro ao carregar participantes, retornando lista vazia:", error.message);
-        return [];
+        // Retorna a estrutura inicial para evitar quebrar o código
+        console.error("Erro ao carregar participantes, retornando estrutura vazia:", error.message);
+        return { sorteadores: [], elegiveis: [] };
     }
 }
 
-// Salva lista
-function salvarParticipantes(lista) {
-    fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2), "utf-8");
+// Salva lista: Recebe e salva o objeto completo
+function salvarParticipantes(data) {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
 
 // --- Rotas da API ---
 
-// ➜ Rota de Root: Opcional, mas serve o index.html principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ➜ Sortear
 app.post("/sortear", (req, res) => {
-    // Lógica para garantir que 'participantes.json' exista antes de tentar ler/escrever.
+    
     if (!fs.existsSync(DB_FILE)) {
-        return res.status(500).json({ erro: "Arquivo de participantes não encontrado." });
+        return res.status(500).json({ erro: "Erro: Arquivo de participantes não encontrado." });
     }
 
     const { nome } = req.body;
@@ -60,46 +58,65 @@ app.post("/sortear", (req, res) => {
         return res.status(400).json({ erro: "Informe seu nome" });
     }
 
-    let participantes = carregarParticipantes();
-
-    // Verificação se já houve sorteio (participantes deve ter menos que o total original)
-    if (participantes.length === 0) {
-        // Você pode querer recarregar a lista original aqui ou informar que o sorteio acabou.
-        return res.status(400).json({ erro: "A lista de participantes está vazia, o sorteio pode ter acabado." });
+    // Carrega a estrutura de duas listas
+    let { sorteadores, elegiveis } = carregarParticipantes();
+    
+    // 1. VERIFICAÇÃO DO JOGO
+    if (sorteadores.length === 0) {
+        // Verifica se o jogo realmente acabou (todos sortearam)
+        return res.status(400).json({ erro: "O sorteio já foi concluído! Todos já sortearam." });
     }
     
-    // Filtra para remover o próprio nome do elegível e garantir que ele está na lista
-    const participantePresente = participantes.some(p => p.toLowerCase() === nome.toLowerCase());
+    // 2. VERIFICAÇÃO SE O USUÁRIO PODE SORTEAR
+    // Verifica se o nome ainda está na lista de quem pode sortear
+    const podeSortear = sorteadores.some(p => p.toLowerCase() === nome.toLowerCase());
 
-    if (!participantePresente) {
-        return res.status(400).json({ erro: "Você não está na lista!" });
+    if (!podeSortear) {
+        return res.status(400).json({ erro: "Você já sorteou seu amigo secreto e não pode sortear novamente!" });
     }
 
-    // Filtra quem não pode ser sorteado (o próprio nome)
-    const elegiveis = participantes.filter(
+    // 3. FILTRO DE ELEGÍVEIS
+    // Filtra quem não pode ser sorteado (o próprio nome) da lista de elegíveis
+    const elegiveisParaSorteio = elegiveis.filter(
         p => p.toLowerCase() !== nome.toLowerCase()
     );
 
-    if (elegiveis.length === 0) {
-        return res.status(400).json({ erro: "Não há mais participantes disponíveis para sortear." });
+    if (elegiveisParaSorteio.length === 0) {
+         // Esta é a condição do último sorteio, onde só resta uma pessoa para sortear a primeira (ciclo)
+        if (sorteadores.length === 1 && elegiveis.length === 1) {
+             // Se o último sorteador só tem uma opção (ele mesmo),
+             // significa que a primeira pessoa sorteada deve ser sorteada pelo último.
+             // Como seu `participantes.json` tem o mesmo número de pessoas nas duas listas,
+             // o último sorteador sempre será capaz de sortear o último elegível.
+             // Para o escopo deste projeto, assumimos que esta condição não será atingida.
+             return res.status(400).json({ erro: "Erro de ciclo: Você é a única pessoa que sobrou para sortear a si mesma. Por favor, reinicie o sorteio." });
+        }
+        
+        return res.status(400).json({ erro: "Não há participantes disponíveis para você sortear." });
     }
 
-    // Lógica de Sorteio
-    const indice = Math.floor(Math.random() * elegiveis.length);
-    const nomeSorteado = elegiveis[indice];
+    // 4. LÓGICA DE SORTEIO
+    const indice = Math.floor(Math.random() * elegiveisParaSorteio.length);
+    const nomeSorteado = elegiveisParaSorteio[indice];
 
-    // Remove o nome sorteado da lista de participantes para evitar repetição (se a intenção for essa)
-    // Nota: Esta lógica é válida se a lista 'participantes.json' for sendo esvaziada a cada sorteio.
-    participantes = participantes.filter(p => p.toLowerCase() !== nomeSorteado.toLowerCase()); 
-    salvarParticipantes(participantes);
+    // 5. ATUALIZAÇÃO DO JOGO
+    
+    // A. Remove QUEM SORTEOU ('nome') da lista de sorteadores
+    sorteadores = sorteadores.filter(p => p.toLowerCase() !== nome.toLowerCase());
+    
+    // B. Remove QUEM FOI SORTEADO ('nomeSorteado') da lista de elegíveis
+    elegiveis = elegiveis.filter(p => p.toLowerCase() !== nomeSorteado.toLowerCase()); 
+    
+    // Salva a nova estrutura de listas
+    salvarParticipantes({ sorteadores, elegiveis });
 
+    // 6. RESPOSTA AO CLIENTE
     res.json({
         sorteado: `${nomeSorteado}`
     });
 });
 
 // --- Inicia servidor ---
-// Apenas uma chamada para 'app.listen' é necessária.
 app.listen(PORT, () => {
     console.log("Servidor rodando na porta " + PORT);
     console.log(`Acesse: http://localhost:${PORT}`);

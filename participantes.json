@@ -1,15 +1,32 @@
-[
-  "Vinicius",
-  "Ketlyn",
-  "Emanuelly",
-  "Benício",
-  "Laura",
-  "Katia",
-  "Neide",
-  "Raiza",
-  "Jennifer",
-  "Gracedite",
-  "Jardielson",
-  "Gil",
-  "Ronaldo"
-]
+{
+  "sorteadores": [
+    "Vinicius",
+    "Ketlyn",
+    "Emanuelly",
+    "Benício",
+    "Laura",
+    "Katia",
+    "Neide",
+    "Raiza",
+    "Jennifer",
+    "Gracedite",
+    "Jardielson",
+    "Gil",
+    "Ronaldo"
+  ],
+  "elegiveis": [
+    "Vinicius",
+    "Ketlyn",
+    "Emanuelly",
+    "Benício",
+    "Laura",
+    "Katia",
+    "Neide",
+    "Raiza",
+    "Jennifer",
+    "Gracedite",
+    "Jardielson",
+    "Gil",
+    "Ronaldo"
+  ]
+}
