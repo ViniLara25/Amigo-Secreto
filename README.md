@@ -1,6 +1,10 @@
 # 🎁 Amigo Secreto de Natal 2025
 
-<img src="images/TelaInicial.jpg" alt="Logo do Projeto" width="200" />
+<div align="center">
+  <img src="images/TelaInicial.jpg" alt="Tela Inicial do Amigo Secreto" width="220"/>
+  &nbsp; &nbsp; &nbsp;
+  <img src="images/Tela2.png" alt="Tela de Sorteio em andamento" width="220"/>
+</div>
 
 [![Feito com Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![Licença MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
