@@ -1,6 +1,9 @@
+# .gitignore
+
 # Dependências
 /node_modules
 /npm-debug.log
 
-# Variáveis de Ambiente
+# Variáveis de Ambiente e Arquivos de Admin Temporários
 .env
+reset.html
