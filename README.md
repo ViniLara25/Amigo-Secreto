@@ -1,6 +1,6 @@
 # 🎁 Amigo Secreto de Natal 2025
 
-<img src="images/TelaInicial.jpg" alt="Logo do Projeto" width="600" />
+<img src="images/TelaInicial.jpg" alt="Logo do Projeto" width="200" />
 
 [![Feito com Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![Licença MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
