@@ -27,10 +27,11 @@ Este projeto foi uma excelente oportunidade para aplicar lógica de processos e 
 
 ## 📌 Como Rodar Localmente
 
-1. Clone o repositório: `git clone [URL_DO_SEU_REPOSITORIO]`
+1. Clone o repositório: `git clone "https://github.com/ViniLara25/Amigo-Secreto"`
 2. Instale as dependências: `npm install`
 3. Inicie o servidor: `npm start`
 4. Acesse: `http://localhost:3000`
 
 ---
-*Desenvolvido por [Seu Nome] - [Seu LinkedIn]*
+*Desenvolvido por Vinicius S. de Lara - www.linkedin.com/in/viniciuslaradev/*
+
