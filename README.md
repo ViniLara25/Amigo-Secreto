@@ -1,5 +1,7 @@
 # 🎁 Amigo Secreto de Natal 2025
 
+![Logo do Projeto](images/TelaInicial.jpg)
+
 [![Feito com Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![Licença MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Deploy Render](https://img.shields.io/badge/Deploy-Render-6AA6C9?style=flat-square&logo=render&logoColor=white)](https://amigo-secreto-54oe.onrender.com/)
@@ -34,4 +36,5 @@ Este projeto foi uma excelente oportunidade para aplicar lógica de processos e 
 
 ---
 *Desenvolvido por Vinicius S. de Lara - www.linkedin.com/in/viniciuslaradev/*
+
 
