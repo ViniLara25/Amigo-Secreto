@@ -127,6 +127,40 @@ app.get('/admin/pares', async (req, res) => {
     }
 });
 
+// server.js - Adicionar na seção de Rotas de Administração
+
+// ➜ ROTA DE ADMINISTRAÇÃO PARA RESETAR O JOGO
+app.post('/admin/reset', async (req, res) => {
+    try {
+        // ID temporário fixo que usamos
+        const TEMPORARY_GROUP_ID = "grupo_principal"; 
+
+        // 1. Carrega os dados iniciais do seu arquivo template
+        const dadosIniciais = require('./participantes.json'); 
+        
+        // 2. Cria a nova estrutura de dados para o reset
+        const resetData = {
+            sorteadores: dadosIniciais.sorteadores,
+            elegiveis: dadosIniciais.elegiveis,
+            pares: [] // Zera os pares
+        };
+
+        // 3. Atualiza o MongoDB com a lista completa
+        // Usamos findOneAndUpdate com upsert: true para garantir que o grupo exista
+        await Grupo.findOneAndUpdate(
+            { groupId: TEMPORARY_GROUP_ID },
+            resetData,
+            { new: true, upsert: true }
+        );
+
+        res.json({ mensagem: "Sucesso! O sorteio foi totalmente resetado. Todos os nomes estão de volta nas duas listas." });
+
+    } catch (error) {
+        console.error("Erro ao resetar o sorteio:", error.message);
+        res.status(500).json({ erro: "Falha ao resetar o jogo. Verifique o console do servidor." });
+    }
+});
+
 
 // ➜ Sortear (AGORA É ASYNC e usa MongoDB)
 app.post("/sortear", async (req, res) => {
